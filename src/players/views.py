@@ -1,0 +1,8 @@
+from rest_framework import viewsets
+from .models import Player
+from .serializers import PlayerSerializer
+
+
+class PlayerViewSet(viewsets.ModelViewSet):
+    queryset = Player.objects.select_related('team').all()
+    serializer_class = PlayerSerializer

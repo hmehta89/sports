@@ -1,0 +1,10 @@
+src/db.sqlite3
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.egg-info/
+dist/
+build/
+src/*/migrations/__pycache__/
