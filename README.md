@@ -63,74 +63,34 @@ bash run_all.sh
 
 ---
 
-## Extraction Coverage — File & Line Metrics
+## Extraction Coverage
 
 ### Formula
 
 ```
-Extraction % (files) = Extracted files for feature
-                       ─────────────────────────────────────────────── × 100
-                       App source files after cleaning
+File extraction % = Extracted files / Total repo files × 100
+                  = 12 / 25 × 100 = 48%
 
-Extraction % (lines) = Extracted lines for feature
-                       ─────────────────────────────────────────────── × 100
-                       App source lines after cleaning
-
-Cleaning removes:
-  migrations/    — auto-generated Django schema files (no business logic)
-  __init__.py    — empty module markers (0 lines, no logic)
+Line extraction % = Extracted lines / Total repo lines × 100
+                  = 172 / 338 × 100 = 51%
 ```
 
-### Per-feature extraction (cleaned baseline)
+### Result
 
-Each feature maps to one Django app. Cleaned = app files minus migrations and `__init__.py`.
+| Metric | Numerator (extracted) | Denominator (parent repo) | % |
+|---|---|---|---|
+| Files | 12 | 25 | **48%** |
+| Lines of code | 172 | 338 | **51%** |
 
-| Feature | App | Cleaned files | Cleaned lines | Extracted files | Extracted lines | File % | Line % |
-|---|---|---|---|---|---|---|---|
-| team-management | `teams/` | 4 | 37 | 4 | 37 | **100%** | **100%** |
-| player-roster | `players/` | 4 | 42 | 4 | 42 | **100%** | **100%** |
-| match-scheduling | `matches/` | 4 | 93 | 4 | 93 | **100%** | **100%** |
-| **All features combined** | — | **12** | **172** | **12** | **172** | **100%** | **100%** |
+### Per-feature breakdown
 
-### Repo-wide extraction (three views)
-
-| Baseline | Total files | Total lines | Extracted files | Extracted lines | File % | Line % |
+| Feature | Extracted files | Repo files (parent app) | File % | Extracted lines | Repo lines (parent app) | Line % |
 |---|---|---|---|---|---|---|
-| **Raw repo** (all 25 .py files) | 25 | 338 | 12 | 172 | 48% | 51% |
-| **Cleaned repo** (remove migrations + inits) | 15 | 249 | 12 | 172 | 80% | 69% |
-| **Feature apps only** (remove global infra too) | 12 | 172 | 12 | 172 | **100%** | **100%** |
+| team-management | 4 | 4 | **100%** | 37 | 37 | **100%** |
+| player-roster | 4 | 4 | **100%** | 42 | 42 | **100%** |
+| match-scheduling | 4 | 4 | **100%** | 93 | 93 | **100%** |
 
-> **Which number to use:** Use *Feature apps only* (100%) to measure how well the pipeline covered the business logic it was asked to extract. Use *Cleaned repo* (80% / 69%) to measure coverage of all meaningful code including infra. Use *Raw repo* (48% / 51%) for a whole-repo accounting that includes generated and empty files.
-
-### What makes up the uncovered 49 raw-repo lines
-
-| File | Role | Lines | Why not extracted |
-|---|---|---|---|
-| `sports_api/settings.py` | config | 48 | Infrastructure — environment-specific, not a feature |
-| `sports_api/urls.py` | root URL dispatcher | 7 | Wires features together; not itself a feature |
-| `manage.py` | Django CLI entry point | 22 | Infrastructure — deployment tooling |
-| `teams/migrations/0001_initial.py` | migration | 27 | Auto-generated schema; regenerated from models |
-| `players/migrations/0001_initial.py` | migration | 31 | Auto-generated schema; regenerated from models |
-| `matches/migrations/0001_initial.py` | migration | 31 | Auto-generated schema; regenerated from models |
-| `*/__init__.py` × 7 | module marker | 0 | Empty boilerplate |
-| **Total not extracted** | | **166** | |
-
-### Extracted files per feature (all source files shown)
-
-| File in repo | Lines | Feature extracted to | Extracted lines |
-|---|---|---|---|
-| `teams/models.py` | 14 | `team-management/models.py` | 14 |
-| `teams/serializers.py` | 8 | `team-management/serializers.py` | 8 |
-| `teams/views.py` | 8 | `team-management/views.py` | 8 |
-| `teams/urls.py` | 7 | `team-management/urls.py` | 7 |
-| `players/models.py` | 17 | `player-roster/models.py` | 17 |
-| `players/serializers.py` | 10 | `player-roster/serializers.py` | 10 |
-| `players/views.py` | 8 | `player-roster/views.py` | 8 |
-| `players/urls.py` | 7 | `player-roster/urls.py` | 7 |
-| `matches/models.py` | 33 | `match-scheduling/models.py` | 33 |
-| `matches/serializers.py` | 29 | `match-scheduling/serializers.py` | 29 |
-| `matches/views.py` | 24 | `match-scheduling/views.py` | 24 |
-| `matches/urls.py` | 7 | `match-scheduling/urls.py` | 7 |
+> Per-feature denominator = files in that app's folder (`teams/`, `players/`, `matches/`) excluding auto-generated migrations and empty `__init__.py`. The 52% of repo lines not extracted are migrations (89 lines), config/infra (77 lines), and empty `__init__.py` files (0 lines) — none of which belong to any single feature.
 
 ---
 
