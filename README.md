@@ -65,24 +65,29 @@ bash run_all.sh
 
 ## Extraction Coverage — File & Line Metrics
 
-### Total codebase breakdown
+### From total repo files
 
-| Category | Files | Lines | % of Total Lines |
+| Category | Files | Lines | % of Repo |
 |---|---|---|---|
-| **All source files** (excl. migrations) | 19 | 249 | 100% |
-| **Core API files** (models + views + serializers + urls) | 13 | 179 | 72% |
-| **Infrastructure** (settings + manage.py + `__init__`) | 6 | 70 | 28% |
-| **Extracted into `features/`** | 12 | 172 | **69%** |
+| **Total repo .py files** | **25** | **338** | 100% |
+| Core API files (models + views + serializers + urls) | 13 | 179 | 53% |
+| Config / Infra (settings + manage.py + root urls) | 3 | 77 | 23% |
+| Migration files | 3 | 89 | 26% |
+| `__init__.py` files (empty boilerplate) | 7 | 0 | 0% |
+| **Extracted into `features/`** | **12** | **172** | **48% files / 51% lines** |
 
-### Core file extraction rate
+### Extraction rates
 
-| Metric | Count | Percentage |
+| Metric | Count | Rate |
 |---|---|---|
-| Core files extracted | 12 / 13 | **92%** |
-| Core lines extracted | 172 / 179 | **96%** |
-| Total lines extracted | 172 / 249 | **69%** |
+| Extracted / total repo files | 12 / 25 | **48%** |
+| Extracted / total repo lines | 172 / 338 | **51%** |
+| Extracted / core API files | 12 / 13 | **92%** |
+| Extracted / core API lines | 172 / 179 | **96%** |
 
-### File-level breakdown
+> The 49% of repo lines not extracted breaks down as: 89 lines in auto-generated migrations (not feature logic), 77 lines in infra (settings, manage.py, root URL dispatcher), and 0 lines in empty `__init__.py` files. All 12 feature-logic files are fully captured.
+
+### File-level breakdown (all 25 repo .py files)
 
 | File | Role | Lines | Extracted |
 |---|---|---|---|
@@ -99,11 +104,28 @@ bash run_all.sh
 | `matches/views.py` | view | 24 | ✅ |
 | `matches/urls.py` | url | 7 | ✅ |
 | `sports_api/settings.py` | config | 48 | ❌ infra |
-| `sports_api/urls.py` | url (root dispatcher) | 7 | ⚠️ partial |
+| `sports_api/urls.py` | url (root dispatcher) | 7 | ❌ infra |
 | `manage.py` | infra | 22 | ❌ infra |
-| `*/__init__.py` (×5) | infra | 0 | ❌ infra |
+| `teams/migrations/0001_initial.py` | migration | 27 | ❌ auto-gen |
+| `players/migrations/0001_initial.py` | migration | 31 | ❌ auto-gen |
+| `matches/migrations/0001_initial.py` | migration | 31 | ❌ auto-gen |
+| `teams/__init__.py` | init | 0 | ❌ empty |
+| `players/__init__.py` | init | 0 | ❌ empty |
+| `matches/__init__.py` | init | 0 | ❌ empty |
+| `sports_api/__init__.py` | init | 0 | ❌ empty |
+| `teams/migrations/__init__.py` | init | 0 | ❌ empty |
+| `players/migrations/__init__.py` | init | 0 | ❌ empty |
+| `matches/migrations/__init__.py` | init | 0 | ❌ empty |
 
-> **Why 69% of total lines?** The 31% gap is entirely infrastructure (`settings.py`, `manage.py`, empty `__init__` files). These are not feature logic — they are the Django boilerplate that wraps the features. All 12 business-logic files are fully extracted.
+### Extraction rate by file type (core API only)
+
+| Type | Extracted | Total | File rate | Lines |
+|---|---|---|---|---|
+| Models | 3 | 3 | **100%** | 64 / 64 |
+| Views | 3 | 3 | **100%** | 40 / 40 |
+| Serializers | 3 | 3 | **100%** | 47 / 47 |
+| URLs (app-level) | 3 | 3 | **100%** | 21 / 21 |
+| URLs (root dispatcher) | 0 | 1 | 0% — infra | 0 / 7 |
 
 ---
 
@@ -526,7 +548,7 @@ DELETE /api/matches/1/           → HTTP 204 ✓
 
 | Phase | What happened |
 |---|---|
-| Phase 0 | Repo cloned, Knowledge Graph built — 19 source files indexed |
+| Phase 0 | Repo cloned, Knowledge Graph built — 25 .py files indexed (338 lines total) |
 | Phase 1 | Architecture mapped — 3 Django apps detected as distinct domains |
 | Phase 2 | Features discovered: `team-management`, `player-roster`, `match-scheduling` |
 | Phase 3 | Dependency graph: players → teams, matches → teams |
